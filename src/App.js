@@ -52,9 +52,9 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Router>
+    <Router> 
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />  
         <Route
           path="/signup"
           element={!isAuthenticated ? <Register /> : <Navigate to="/profile" />}
@@ -69,8 +69,7 @@ function App() {
         />
         <Route
           path="/missingreport"
-          element={
-            isAuthenticated ? <MissingReport /> : <Navigate to="/login" />
+          element={isAuthenticated ? <MissingReport /> : <Navigate to="/login" />
           }
         />
         <Route

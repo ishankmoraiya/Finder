@@ -1,30 +1,103 @@
-import React from "react";
-// import { Link } from "react-router-dom";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../Layout/Header/Header";
 import { IoPerson } from "react-icons/io5";
-// import { TbCircleLetterF } from "react-icons/tb";
 import "./Home.scss";
+import axios from "axios";
+import { server } from "../../redux/store";
+import toast from "react-hot-toast";
+import ClipLoader from "react-spinners/ClipLoader";
 
-const Home = () => {
-  return (
+const ActiveAccount = () => {
+  const { error, message, loading } = useSelector((state) => state.activate);
+
+  const { token } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    verifyAccount();
+  }, []);
+
+  const verifyAccount = async () => {
+    try {
+      dispatch({ type: "sendMailRequest" });
+
+      const { data } = await axios.post(
+        `${server}/activate`,
+        { token },
+        {
+          withCredentials: true,
+        }
+      );
+
+      dispatch({ type: "sendMailSuccess", payload: data.message });
+
+      setTimeout(() => {
+        navigate("/");
+      }, 5000);
+    } catch (error) {
+      dispatch({ type: "sendMailFail", payload: error.response.data.message });
+      setTimeout(() => {
+        navigate("/");
+      }, 5000);
+    }
+  };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch({ type: "clearError" });
+    }
+
+    if (message) {
+      toast.success(message);
+      dispatch({ type: "clearMessage" });
+    }
+  }, [dispatch, error, message]);
+
+  return loading ? (
+    <div className="loading">
+      <ClipLoader color="#ff5c35" size={150} />
+    </div>
+  ) : (
     <div>
       <Header />
       <div className="home">
-        <div className="container">
-          <div className="image">
-            <img src="/missing.jpg" alt="" />
-          </div>
-          <div className="text">
-            <h2>Found a Lost Person? <br />
-              OR <br /> Report a Lost Person ! </h2>
+        <div className="box">
+          <div className="warning">
+            {error && (
+              <h2 style={{ color: "red" }}>Some Problem has Occured.</h2>
+            )}
+            {message && (
+              <h2 style={{ color: "green" }}>Email Verified Successfully</h2>
+            )}
             <p>
-              You can easily find your loved one by just submitting thier report and We will work on it as well as if anyone found lost person anywhere can also submit thier report to help us. <br /> So click on Get Started.
+              <span style={{ color: "#ff5c35" }}>
+                You will be automatically redirected to home page in 5 seconds.
+              </span>
             </p>
-            <a href="#box">
-              <button>
-                <IoPerson /> Get Started
-              </button>
-            </a>
+          </div>
+          <div className="container">
+            <div className="image">
+              <img src="/missing.jpg" alt="" />
+            </div>
+            <div className="text">
+              <h2>
+                Report a Missing Person or submit a report of Found Person.
+              </h2>
+              <p>
+                This portal is open 24 hour's. You can submit your report
+                anytime.
+              </p>
+              <a href="#box">
+                <button>
+                  <IoPerson /> Get Started
+                </button>
+              </a>
+            </div>
           </div>
         </div>
         <div className="container2" id="box">
@@ -40,7 +113,17 @@ const Home = () => {
                 You have to create an account in order to continue with this
                 website.
               </p>
-              <a href="/signup">SignUp</a>
+            </div>
+            <div className="card">
+              <img
+                src="https://img.freepik.com/free-vector/authentication-concept-illustration_114360-2168.jpg?size=626&ext=jpg"
+                alt=""
+              />
+              <h3>Verify Details</h3>
+              <p>
+                After login verify your Email address and Complete your other
+                details in order to submit your reports.
+              </p>
             </div>
             <div className="card">
               <img
@@ -83,8 +166,7 @@ const Home = () => {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
-                width="170px"
-                height="170px"
+                className="logo"
               >
                 <path
                   fill="#D6E5E5"
@@ -101,15 +183,9 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-         
-
       </div>
     </div>
   );
 };
 
-//This is to check the first push req.
-//this is 2 push to check
-
-export default Home;
+export default ActiveAccount;
